@@ -8,6 +8,7 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
 from .base import *  # noqa: F403
+from .base import BASE_DJOSER
 from .base import DATABASES
 from .base import INSTALLED_APPS
 from .base import REDIS_URL
@@ -216,3 +217,17 @@ SPECTACULAR_SETTINGS["SERVERS"] = [
 ]
 # Your stuff...
 # ------------------------------------------------------------------------------
+DOMAIN = "rod.com"
+SITE_NAME = "Rod"
+
+
+# DJOSER
+# ------------------------------------------------------------------------------
+DJOSER = {
+    **BASE_DJOSER,
+    "SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": [
+        f"http://{DOMAIN}/auth/o/google-oauth2/",
+    ],
+}
+
+LOGIN_REDIRECT_URL = f"https://{DOMAIN}/about"

@@ -1,0 +1,25 @@
+{
+    "cSpell.words": [
+        "asgi",
+        "authtoken",
+        "corsheaders",
+        "djoser",
+        "einfo",
+        "gethostname",
+        "levelname",
+        "mailpit",
+        "Nhat",
+        "nostatic",
+        "Phong",
+        "rediss",
+        "reqs",
+        "shrestic",
+        "simplejwt",
+        "Styleguide"
+    ],
+    "python.testing.pytestArgs": [
+        "rod"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

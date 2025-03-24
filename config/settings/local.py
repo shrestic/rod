@@ -1,5 +1,6 @@
 # ruff: noqa: E501
 from .base import *  # noqa: F403
+from .base import BASE_DJOSER
 from .base import INSTALLED_APPS
 from .base import MIDDLEWARE
 from .base import env
@@ -72,5 +73,20 @@ INSTALLED_APPS += ["django_extensions"]
 
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-eager-propagates
 CELERY_TASK_EAGER_PROPAGATES = True
+
 # Your stuff...
 # ------------------------------------------------------------------------------
+DOMAIN = "localhost:8000"
+SITE_NAME = "Rod (Dev)"
+
+# DJOSER
+# ------------------------------------------------------------------------------
+DJOSER = {
+    **BASE_DJOSER,
+    "SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": [
+        f"http://{DOMAIN}/auth/o/google-oauth2/",
+    ],
+}
+
+
+LOGIN_REDIRECT_URL = f"http://{DOMAIN}/about"

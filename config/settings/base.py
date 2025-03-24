@@ -2,6 +2,7 @@
 """Base settings to build other settings files upon."""
 
 import ssl
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -77,10 +78,19 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "djoser",
+    "social_django",
 ]
 
 LOCAL_APPS = [
     # Your stuff: custom apps go here
+    "rod.users",
+    "rod.files",
+    "rod.common",
+    "rod.core",
+    "rod.email",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -131,6 +141,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
 
 # STATIC
@@ -176,6 +187,8 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
+                "social_django.context_processors.backends",
+                "social_django.context_processors.login_redirect",
             ],
         },
     },
@@ -210,7 +223,7 @@ EMAIL_TIMEOUT = 5
 # Django Admin URL.
 ADMIN_URL = "admin/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#admins
-ADMINS = [("""Nguyen Nhat Phong""", "nhatphongcgp@gmail.com")]
+ADMINS = [("""shrestic""", "shrestic@gmail.com")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
 MANAGERS = ADMINS
 # https://cookiecutter-django.readthedocs.io/en/latest/settings.html#other-environment-settings
@@ -287,9 +300,11 @@ CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 # -------------------------------------------------------------------------------
 # django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/
 REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "rod.common.exception_handlers.custom_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -304,8 +319,87 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "rod API",
     "DESCRIPTION": "Documentation of API endpoints of rod",
     "VERSION": "1.0.0",
+    "TAGS": [
+        {"name": "auth", "description": "JWT & user auth endpoints"},
+        {"name": "users", "description": "User management endpoints"},
+        {"name": "schema", "description": "Schema related"},
+    ],
+    "SWAGGER_UI_SETTINGS": {
+        "docExpansion": "none",
+    },
     "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAdminUser"],
     "SCHEMA_PATH_PREFIX": "/api/",
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+# SimpleJWT
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# Djoser
+# ------------------------------------------------------------------------------
+# Djoser configuration for user authentication and management
+BASE_DJOSER = {
+    # Require password confirmation when creating a new user
+    "USER_CREATE_PASSWORD_RETYPE": True,
+    # Send activation email when user registers
+    "SEND_ACTIVATION_EMAIL": True,
+    # Send confirmation email when user confirms their email
+    "SEND_CONFIRMATION_EMAIL": True,
+    # URL pattern for account activation
+    "ACTIVATION_URL": "activate/{uid}/{token}",
+    # URL pattern for password reset confirmation
+    "PASSWORD_RESET_CONFIRM_URL": "password/reset/confirm/{uid}/{token}",
+    # Send confirmation email when user changes their password
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+    # Require password confirmation when resetting password
+    "PASSWORD_RESET_CONFIRM_RETYPE": True,
+    # Use JWT tokens for social authentication
+    "SOCIAL_AUTH_TOKEN_STRATEGY": "djoser.social.token.jwt.TokenStrategy",
+    # Custom serializers for different user operations
+    "SERIALIZERS": {
+        "activation": "djoser.serializers.ActivationSerializer",
+        "user_create": "core.serializers.UserCreateSerializer",
+        "current_user": "core.serializers.UserSerializer",
+    },
+    "EMAIL": {
+        "activation": "rod.email.djoser.CustomActivationEmail",
+        "confirmation": "rod.email.djoser.CustomConfirmationEmail",
+        "password_reset": "rod.email.djoser.CustomPasswordResetEmail",
+        "password_changed_confirmation": "rod.email.djoser.CustomPasswordChangedConfirmationEmail",
+    },
+}
+# Google OAuth
+AUTHENTICATION_BACKENDS = (
+    "social_core.backends.google.GoogleOAuth2",
+    "django.contrib.auth.backends.ModelBackend",
+)
+
+# Google OAuth
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env.str("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env.str("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
+SOCIAL_AUTH_PIPELINE = (
+    "social_core.pipeline.social_auth.social_details",
+    "social_core.pipeline.social_auth.social_uid",
+    "social_core.pipeline.social_auth.social_user",
+    "social_core.pipeline.user.get_username",
+    "social_core.pipeline.social_auth.associate_by_email",
+    "social_core.pipeline.user.create_user",
+    "social_core.pipeline.social_auth.associate_user",
+    "social_core.pipeline.social_auth.load_extra_data",
+    "social_core.pipeline.user.user_details",
+)
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["email", "profile"]
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
+
+# Custom User Model
+AUTH_USER_MODEL = "users.BaseUser"
+
+# Email
+DEFAULT_FROM_EMAIL = "no-reply@rod.com"
+
+ADMINS = [("shrestic", "admin@shrestic.com")]

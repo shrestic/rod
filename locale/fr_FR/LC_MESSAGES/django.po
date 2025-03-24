@@ -1,6 +1,6 @@
 # Translations for the rod project
-# Copyright (C) 2025 Nguyen Nhat Phong
-# Nguyen Nhat Phong <nhatphongcgp@gmail.com>, 2025.
+# Copyright (C) 2025 shrestic
+# shrestic <shrestic@gmail.com>, 2025.
 #
 #, fuzzy
 msgid ""
