@@ -87,7 +87,6 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     # Your stuff: custom apps go here
     "rod.users",
-    "rod.files",
     "rod.common",
     "rod.core",
     "rod.email",
