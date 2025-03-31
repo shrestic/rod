@@ -12,6 +12,8 @@ from rod.etl.models import Customer
 from rod.etl.selectors import CustomerSelector
 from rod.etl.services import CustomerService
 
+CUSTOMER_ACCESS_DENIED = "You do not have permission to view this customer's data."
+
 
 class CustomerUpdateApi(APIView):
     permission_classes = [IsAuthenticated]
@@ -27,8 +29,8 @@ class CustomerUpdateApi(APIView):
             model = Customer
             fields = ["id", "phone", "address", "birth_date", "image"]
 
-    def put(self, request, pk):
-        customer = CustomerSelector().customer_get(customer_id=pk)
+    def put(self, request):
+        customer = CustomerSelector().customer_get(user_id=request.user.id)
         if customer is None:
             raise ApplicationError(message="Customer not found")
         input_serializer = self.InputSerializer(data=request.data)
@@ -63,8 +65,9 @@ class CustomerDetailApi(APIView):
             model = Customer
             fields = ["id", "phone", "address", "birth_date", "image"]
 
-    def get(self, request, pk):
-        customer = CustomerSelector().customer_get(customer_id=pk)
+    def get(self, request):
+        customer = CustomerSelector().customer_get(user_id=request.user.id)
+
         if customer is None:
             raise ApplicationError(message="Customer not found")
         output_serializer = self.OutputSerializer(customer)
