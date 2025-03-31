@@ -10,7 +10,7 @@ class CustomerValidator:
 
     def validate_file_size(self, file):
         max_size_kb = 500
-        if file.size > max_size_kb * 1024:
+        if file and file.size > max_size_kb * 1024:
             msg = f"Files cannot be larger than {max_size_kb}KB!"
             raise ValidationError(msg)
 
