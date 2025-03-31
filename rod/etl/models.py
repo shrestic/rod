@@ -1,0 +1,40 @@
+import uuid
+
+from django.conf import settings
+from django.db import models
+
+from rod.common.models import BaseModel
+from rod.etl.validators import CustomerValidator
+
+
+# Create your models here.
+class Customer(BaseModel):
+    PHONE_LENGTH = 10
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    phone = models.CharField(max_length=PHONE_LENGTH, default="", blank=True)
+    address = models.TextField(default="", blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+    image = models.ImageField(
+        upload_to="customer/images",
+        validators=[CustomerValidator().validate_file_size],
+        default="customer/images/default.jpg",
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+
+    @property
+    def first_name(self):
+        return self.user.first_name
+
+    @property
+    def last_name(self):
+        return self.user.last_name
+
+    def clean(self):
+        CustomerValidator().validate_birth_date(self.birth_date)
+        CustomerValidator().validate_phone(self.phone)
+
+    class Meta:
+        ordering = ["user__first_name", "user__last_name"]
