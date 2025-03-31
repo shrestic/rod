@@ -16,7 +16,6 @@ class Customer(BaseModel):
     birth_date = models.DateField(null=True, blank=True)
     image = models.ImageField(
         upload_to="customer/images",
-        validators=[CustomerValidator().validate_file_size],
         blank=True,
         null=True,
     )
@@ -36,6 +35,7 @@ class Customer(BaseModel):
     def clean(self):
         CustomerValidator().validate_birth_date(self.birth_date)
         CustomerValidator().validate_phone(self.phone)
+        CustomerValidator().validate_file_size(self.image)
 
     class Meta:
         ordering = ["user__first_name", "user__last_name"]
