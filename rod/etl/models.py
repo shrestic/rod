@@ -17,7 +17,8 @@ class Customer(BaseModel):
     image = models.ImageField(
         upload_to="customer/images",
         validators=[CustomerValidator().validate_file_size],
-        default="customer/images/default.jpg",
+        blank=True,
+        null=True,
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
