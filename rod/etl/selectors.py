@@ -11,8 +11,13 @@ class CustomerSelector:
     def __init__(self) -> None:
         pass
 
-    def customer_get(self, *, user_id: uuid.UUID) -> Customer:
-        return get_object(Customer, user_id=user_id)
+    def customer_get(self, *, pk: uuid.UUID) -> Customer:
+        queryset = Customer.objects.select_related("user")
+        return get_object(queryset, pk=pk)
+
+    def customer_me(self, *, user_id: uuid.UUID) -> Customer:
+        queryset = Customer.objects.select_related("user")
+        return get_object(queryset, user_id=user_id)
 
     def customer_list(self, filters=None) -> QuerySet[Customer]:
         filters = filters or {}

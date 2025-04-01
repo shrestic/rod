@@ -13,13 +13,13 @@ class TestCustomer:
     def test_if_customer_is_created_when_user_is_created_return_201(self, user):
         assert Customer.objects.filter(user=user).exists()
 
-    def test_if_customer_is_updated_return_200(self, authenticate, api_client):
+    def test_if_customer_me_is_updated_return_200(self, authenticate, api_client):
         # Arrange: Set up the test data and mocks
         authenticate()  # Authenticate the user to make API calls
 
         # Create a mock customer with initial data
         mock_customer = make_mock_object(
-            id=1,
+            id="123e4567-e89b-12d3-a456-426614174000",
             phone="0987654321",
             address="Old Address",
             birth_date="1990-01-01",
@@ -27,7 +27,7 @@ class TestCustomer:
 
         # Create a mock customer with updated data to return from customer_update
         updated_mock_customer = make_mock_object(
-            id=1,
+            id="123e4567-e89b-12d3-a456-426614174000",
             phone="1234567890",
             address="1234567890",
             birth_date="2021-01-01",
@@ -36,7 +36,7 @@ class TestCustomer:
         # Mock CustomerSelector and CustomerService
         with (
             patch(
-                "rod.etl.selectors.CustomerSelector.customer_get",
+                "rod.etl.selectors.CustomerSelector.customer_me",
                 return_value=mock_customer,
             ),
             patch(
@@ -60,10 +60,82 @@ class TestCustomer:
 
             # Assert: Verify the results
             assert response.status_code == status.HTTP_200_OK
-            assert response.data["id"] == "1"
+            assert response.data["id"] == "123e4567-e89b-12d3-a456-426614174000"
             assert response.data["phone"] == "1234567890"
             assert response.data["address"] == "1234567890"
             assert response.data["birth_date"] == "2021-01-01"
+
+    def test_if_user_is_authenticated_can_get_customer_me_return_200(
+        self,
+        authenticate,
+        api_client,
+    ):
+        authenticate()
+
+        # Create a mock user
+        mock_user = make_mock_object(
+            id="123e4567-e89b-12d3-a456-426614174001",
+            username="testuser",
+            first_name="Test",
+            last_name="User",
+            email="test@example.com",
+        )
+
+        # Create a mock customer with user
+        mock_customer = make_mock_object(
+            id="123e4567-e89b-12d3-a456-426614174002",
+            phone="0987654321",
+            address="Old Address",
+            birth_date="1990-01-01",
+            user=mock_user,
+        )
+
+        # Mock CustomerSelector
+        with patch(
+            "rod.etl.selectors.CustomerSelector.customer_me",
+            return_value=mock_customer,
+        ):
+            response = api_client.get("/etl/customers/me/")
+            assert response.status_code == status.HTTP_200_OK
+
+    def test_if_user_is_admin_can_get_customer_detail_return_200(
+        self,
+        authenticate,
+        api_client,
+    ):
+        authenticate(is_staff=True)
+
+        # Create a mock user
+        mock_user = make_mock_object(
+            id="123e4567-e89b-12d3-a456-426614174003",
+            username="testuser",
+            first_name="Test",
+            last_name="User",
+            email="test@example.com",
+        )
+
+        # Create a mock customer with user
+        mock_customer = make_mock_object(
+            id="123e4567-e89b-12d3-a456-426614174004",
+            phone="0987654321",
+            address="Old Address",
+            birth_date="1990-01-01",
+            user=mock_user,
+        )
+
+        # Mock CustomerSelector
+        with patch(
+            "rod.etl.selectors.CustomerSelector.customer_get",
+            return_value=mock_customer,
+        ):
+            response = api_client.get(
+                "/etl/customers/123e4567-e89b-12d3-a456-426614174004/",
+            )
+            assert response.status_code == status.HTTP_200_OK
+            assert response.data["id"] == "123e4567-e89b-12d3-a456-426614174004"
+            assert response.data["phone"] == "0987654321"
+            assert response.data["address"] == "Old Address"
+            assert response.data["birth_date"] == "1990-01-01"
 
     def test_if_user_is_admin_can_get_customer_list_return_200(
         self,
@@ -94,12 +166,12 @@ class TestCustomer:
         baker.make(
             "users.BaseUser",
             is_staff=False,
-            first_name="Jane",
-            last_name="Smith",
+            first_name="Paul",
+            last_name="Walker",
         )
 
         response = api_client.get("/etl/customers/?is_staff=False")
         assert response.status_code == status.HTTP_200_OK
         assert response.data["count"] == 1
-        assert response.data["results"][0]["user"]["first_name"] == "Jane"
-        assert response.data["results"][0]["user"]["last_name"] == "Smith"
+        assert response.data["results"][0]["user"]["first_name"] == "Paul"
+        assert response.data["results"][0]["user"]["last_name"] == "Walker"
