@@ -31,19 +31,32 @@ jobs:
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
 
-  # With no caching at all the entire ci process takes 3m to complete!
   pytest:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code Repository
         uses: actions/checkout@v4
 
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build the Stack
-        run: docker compose -f docker-compose.local.yml build django
+        run: |
+          docker compose -f docker-compose.local.yml build django \
+            --build-arg BUILDKIT_INLINE_CACHE=1
 
       - name: Build the docs
-        run: docker compose -f docker-compose.docs.yml build docs
+        run: |
+          docker compose -f docker-compose.docs.yml build docs \
+            --build-arg BUILDKIT_INLINE_CACHE=1
 
       - name: Check DB Migrations
         run: docker compose -f docker-compose.local.yml run --rm django python manage.py makemigrations --check
