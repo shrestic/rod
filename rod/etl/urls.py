@@ -1,9 +1,9 @@
 from django.urls import include
 from django.urls import path
 
-from rod.etl.apis import CustomerDetailApi
-from rod.etl.apis import CustomerListApi
-from rod.etl.apis import CustomerUpdateApi
+from rod.etl.apis.customer import CustomerDetailApi
+from rod.etl.apis.customer import CustomerListApi
+from rod.etl.apis.customer import CustomerUpdateApi
 
 customer_patterns = [
     path("", CustomerListApi.as_view(), name="list"),

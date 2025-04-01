@@ -5,6 +5,7 @@
         "corsheaders",
         "djoser",
         "einfo",
+        "filterset",
         "gethostname",
         "levelname",
         "mailpit",

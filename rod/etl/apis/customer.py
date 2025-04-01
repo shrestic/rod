@@ -1,20 +1,20 @@
-# Create your api views here.
-
 from rest_framework import serializers
 from rest_framework import status
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from rod.common.pagination import get_paginated_response
 from rod.core.exceptions import ApplicationError
 from rod.etl.models import Customer
 from rod.etl.selectors import CustomerSelector
 from rod.etl.services import CustomerService
+from rod.users.serializers import UserSerializer
 
-CUSTOMER_ACCESS_DENIED = "You do not have permission to view this customer's data."
 
-
+# Create your api views here.
 class CustomerUpdateApi(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -46,15 +46,51 @@ class CustomerUpdateApi(APIView):
 class CustomerListApi(APIView):
     permission_classes = [IsAdminUser]
 
+    class Pagination(LimitOffsetPagination):
+        default_limit = 10
+
+    class FilterSerializer(serializers.Serializer):
+        id = serializers.UUIDField(required=False)
+        is_staff = serializers.BooleanField(
+            required=False,
+            allow_null=True,
+            default=None,
+        )
+        is_active = serializers.BooleanField(
+            required=False,
+            allow_null=True,
+            default=None,
+        )
+        email = serializers.EmailField(required=False)
+        phone = serializers.CharField(required=False)
+        address = serializers.CharField(required=False)
+        first_name = serializers.CharField(required=False)
+        last_name = serializers.CharField(required=False)
+        birth_date_after = serializers.DateField(required=False)
+        birth_date_before = serializers.DateField(required=False)
+
     class OutputSerializer(serializers.ModelSerializer):
+        user = UserSerializer()
+
         class Meta:
             model = Customer
-            fields = ["id", "phone", "address", "birth_date", "image"]
+            fields = ["id", "phone", "address", "birth_date", "image", "user"]
 
     def get(self, request):
-        customers = CustomerSelector().customer_list()
-        output_serializer = self.OutputSerializer(customers, many=True)
-        return Response(output_serializer.data, status=status.HTTP_200_OK)
+        filters_serializer = self.FilterSerializer(data=request.query_params)
+        filters_serializer.is_valid(raise_exception=True)
+
+        users = CustomerSelector().customer_list(
+            filters=filters_serializer.validated_data,
+        )
+
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputSerializer,
+            queryset=users,
+            request=request,
+            view=self,
+        )
 
 
 class CustomerDetailApi(APIView):
