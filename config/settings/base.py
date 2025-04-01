@@ -337,15 +337,13 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_TYPES": ("JWT",),
 }
 
 # Djoser
 # ------------------------------------------------------------------------------
 # Djoser configuration for user authentication and management
 BASE_DJOSER = {
-    # Require password confirmation when creating a new user
-    "USER_CREATE_PASSWORD_RETYPE": True,
     # Send activation email when user registers
     "SEND_ACTIVATION_EMAIL": True,
     # Send confirmation email when user confirms their email
