@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 
-class CustomerValidator:
+class UserValidator:
     PHONE_LENGTH = 10
 
     def __init__(self) -> None:

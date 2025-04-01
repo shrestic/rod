@@ -5,12 +5,13 @@ from django.contrib import admin
 from django.db import models
 
 from rod.common.models import BaseModel
-from rod.etl.validators import CustomerValidator
+from rod.etl.validators import UserValidator
+
+PHONE_LENGTH = 10
 
 
 # Create your models here.
 class Customer(BaseModel):
-    PHONE_LENGTH = 10
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     phone = models.CharField(max_length=PHONE_LENGTH, default="", blank=True)
     address = models.TextField(default="", blank=True)
@@ -34,9 +35,38 @@ class Customer(BaseModel):
         return self.user.last_name
 
     def clean(self):
-        CustomerValidator().validate_birth_date(self.birth_date)
-        CustomerValidator().validate_phone(self.phone)
-        CustomerValidator().validate_file_size(self.image)
+        UserValidator().validate_birth_date(self.birth_date)
+        UserValidator().validate_phone(self.phone)
+        UserValidator().validate_file_size(self.image)
+
+    class Meta:
+        ordering = ["user__first_name", "user__last_name"]
+
+
+class Employee(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=PHONE_LENGTH, default="", blank=True)
+    address = models.TextField(default="", blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+    position = models.CharField(max_length=255, default="", blank=True)
+    department = models.CharField(max_length=255, default="", blank=True)
+    start_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+
+    @admin.display(ordering="user__first_name")
+    def first_name(self):
+        return self.user.first_name
+
+    @admin.display(ordering="user__last_name")
+    def last_name(self):
+        return self.user.last_name
+
+    def clean(self):
+        UserValidator().validate_birth_date(self.birth_date)
+        UserValidator().validate_phone(self.phone)
 
     class Meta:
         ordering = ["user__first_name", "user__last_name"]
