@@ -90,6 +90,7 @@ LOCAL_APPS = [
     "rod.common",
     "rod.core",
     "rod.email",
+    "rod.etl",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -362,8 +363,9 @@ BASE_DJOSER = {
     # Custom serializers for different user operations
     "SERIALIZERS": {
         "activation": "djoser.serializers.ActivationSerializer",
-        "user_create": "core.serializers.UserCreateSerializer",
-        "current_user": "core.serializers.UserSerializer",
+        "user_create": "rod.users.serializers.UserCreateSerializer",
+        "user": "rod.users.serializers.UserSerializer",
+        "current_user": "rod.users.serializers.UserSerializer",
     },
     "EMAIL": {
         "activation": "rod.email.djoser.CustomActivationEmail",

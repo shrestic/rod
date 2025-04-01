@@ -23,6 +23,8 @@ urlpatterns = [
     path("auth/", include("djoser.urls.jwt")),
     path("auth/", include("djoser.social.urls")),
     path("auth/", include("social_django.urls", namespace="social")),
+    # Your stuff: custom urls includes go here
+    path("etl/", include("rod.etl.urls")),
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]
@@ -33,7 +35,6 @@ if settings.DEBUG:
 # API URLS
 urlpatterns += [
     # API base url
-    path("api/", include("config.api_router")),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path(
         "api/docs/",
