@@ -1,5 +1,6 @@
 from rod.common.services import model_update
 from rod.etl.models import Customer
+from rod.etl.models import Employee
 from rod.users.models import BaseUser
 
 
@@ -26,3 +27,13 @@ class CustomerService:
             data=data,
         )
         return customer
+
+
+class EmployeeService:
+    def __init__(self) -> None:
+        pass
+
+    def employee_create(self, *, user: BaseUser) -> Employee:
+        employee = Employee(user=user)
+        employee.full_clean()
+        employee.save()
