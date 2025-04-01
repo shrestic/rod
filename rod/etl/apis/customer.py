@@ -15,7 +15,7 @@ from rod.users.serializers import UserSerializer
 
 
 # Create your api views here.
-class CustomerUpdateApi(APIView):
+class CustomerMeUpdateApi(APIView):
     permission_classes = [IsAuthenticated]
 
     class InputSerializer(serializers.Serializer):
@@ -30,7 +30,7 @@ class CustomerUpdateApi(APIView):
             fields = ["id", "phone", "address", "birth_date", "image"]
 
     def put(self, request):
-        customer = CustomerSelector().customer_get(user_id=request.user.id)
+        customer = CustomerSelector().customer_me(user_id=request.user.id)
         if customer is None:
             raise ApplicationError(message="Customer not found")
         input_serializer = self.InputSerializer(data=request.data)
@@ -94,15 +94,36 @@ class CustomerListApi(APIView):
 
 
 class CustomerDetailApi(APIView):
+    permission_classes = [IsAdminUser]
+
+    class OutputSerializer(serializers.ModelSerializer):
+        user = UserSerializer()
+
+        class Meta:
+            model = Customer
+            fields = ["id", "phone", "address", "birth_date", "image", "user"]
+
+    def get(self, request, pk):
+        customer = CustomerSelector().customer_get(pk=pk)
+
+        if customer is None:
+            raise ApplicationError(message="Customer not found")
+        output_serializer = self.OutputSerializer(customer)
+        return Response(output_serializer.data, status=status.HTTP_200_OK)
+
+
+class CustomerMeDetailApi(APIView):
     permission_classes = [IsAuthenticated]
 
     class OutputSerializer(serializers.ModelSerializer):
+        user = UserSerializer()
+
         class Meta:
             model = Customer
-            fields = ["id", "phone", "address", "birth_date", "image"]
+            fields = ["id", "phone", "address", "birth_date", "image", "user"]
 
     def get(self, request):
-        customer = CustomerSelector().customer_get(user_id=request.user.id)
+        customer = CustomerSelector().customer_me(user_id=request.user.id)
 
         if customer is None:
             raise ApplicationError(message="Customer not found")
