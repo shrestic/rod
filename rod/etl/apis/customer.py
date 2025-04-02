@@ -13,9 +13,29 @@ from rod.etl.selectors import CustomerSelector
 from rod.etl.services import CustomerService
 from rod.users.serializers import UserSerializer
 
-
 # Create your api views here.
-class CustomerMeUpdateApi(APIView):
+
+
+class MeCustomerDetailApi(APIView):
+    permission_classes = [IsAuthenticated]
+
+    class OutputSerializer(serializers.ModelSerializer):
+        user = UserSerializer()
+
+        class Meta:
+            model = Customer
+            fields = ["id", "phone", "address", "birth_date", "image", "user"]
+
+    def get(self, request):
+        customer = CustomerSelector().customer_get(user_id=request.user.id)
+
+        if customer is None:
+            raise ApplicationError(message="Customer not found")
+        output_serializer = self.OutputSerializer(customer)
+        return Response(output_serializer.data, status=status.HTTP_200_OK)
+
+
+class MeCustomerUpdateApi(APIView):
     permission_classes = [IsAuthenticated]
 
     class InputSerializer(serializers.Serializer):
@@ -30,7 +50,7 @@ class CustomerMeUpdateApi(APIView):
             fields = ["id", "phone", "address", "birth_date", "image"]
 
     def put(self, request):
-        customer = CustomerSelector().customer_me(user_id=request.user.id)
+        customer = CustomerSelector().customer_get(user_id=request.user.id)
         if customer is None:
             raise ApplicationError(message="Customer not found")
         input_serializer = self.InputSerializer(data=request.data)
@@ -43,7 +63,7 @@ class CustomerMeUpdateApi(APIView):
         return Response(output_serializer.data, status=status.HTTP_200_OK)
 
 
-class CustomerListApi(APIView):
+class AdminCustomerListApi(APIView):
     permission_classes = [IsAdminUser]
 
     class Pagination(LimitOffsetPagination):
@@ -93,7 +113,7 @@ class CustomerListApi(APIView):
         )
 
 
-class CustomerDetailApi(APIView):
+class AdminCustomerDetailApi(APIView):
     permission_classes = [IsAdminUser]
 
     class OutputSerializer(serializers.ModelSerializer):
@@ -105,25 +125,6 @@ class CustomerDetailApi(APIView):
 
     def get(self, request, pk):
         customer = CustomerSelector().customer_get(pk=pk)
-
-        if customer is None:
-            raise ApplicationError(message="Customer not found")
-        output_serializer = self.OutputSerializer(customer)
-        return Response(output_serializer.data, status=status.HTTP_200_OK)
-
-
-class CustomerMeDetailApi(APIView):
-    permission_classes = [IsAuthenticated]
-
-    class OutputSerializer(serializers.ModelSerializer):
-        user = UserSerializer()
-
-        class Meta:
-            model = Customer
-            fields = ["id", "phone", "address", "birth_date", "image", "user"]
-
-    def get(self, request):
-        customer = CustomerSelector().customer_me(user_id=request.user.id)
 
         if customer is None:
             raise ApplicationError(message="Customer not found")

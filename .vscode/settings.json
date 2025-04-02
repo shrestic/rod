@@ -3,8 +3,11 @@
         "asgi",
         "authtoken",
         "corsheaders",
+        "defaultpass",
+        "defaultuser",
         "djoser",
         "einfo",
+        "fakeadmin",
         "filterset",
         "gethostname",
         "levelname",
@@ -14,7 +17,8 @@
         "reqs",
         "shrestic",
         "simplejwt",
-        "Styleguide"
+        "Styleguide",
+        "testpass"
     ],
     "python.testing.pytestArgs": [
         "rod"
