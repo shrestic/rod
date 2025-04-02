@@ -12,12 +12,13 @@ def api_client():
 
 @pytest.fixture
 def authenticate(api_client):
-    def do_authenticate(is_staff=False):  # noqa: FBT002
-        return api_client.force_authenticate(user=User(is_staff=is_staff))
+    def do_authenticate(is_staff=False, is_superuser=False):  # noqa: FBT002
+        user = User(
+            username="fakeadmin",
+            is_staff=is_staff,
+            is_superuser=is_superuser,
+        )
+        api_client.force_authenticate(user=user)
+        return user
 
     return do_authenticate
-
-
-@pytest.fixture
-def user():
-    return User.objects.create_user(username="testuser", password="testpassword")  # noqa: S106

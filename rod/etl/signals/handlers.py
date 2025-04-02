@@ -10,7 +10,7 @@ from rod.etl.services import EmployeeService
 def create_customer_for_new_user(sender, **kwargs):
     if kwargs["created"]:
         user = kwargs["instance"]
-        if user.is_staff and not user.is_superuser:
+        if user.is_staff:
             EmployeeService().employee_create(user=user)
-        elif not user.is_staff:
+        else:
             CustomerService().customer_create(user=user)
