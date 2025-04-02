@@ -5,19 +5,25 @@ from django.db.models.query import QuerySet
 from rod.common.utils import get_object
 from rod.etl.filters import CustomerFilter
 from rod.etl.models import Customer
+from rod.etl.models import Employee
 
 
 class CustomerSelector:
     def __init__(self) -> None:
         pass
 
-    def customer_get(self, *, pk: uuid.UUID) -> Customer:
+    def customer_get(
+        self,
+        *,
+        pk: uuid.UUID | None = None,
+        user_id: uuid.UUID | None = None,
+    ) -> Customer | None:
         queryset = Customer.objects.select_related("user")
-        return get_object(queryset, pk=pk)
-
-    def customer_me(self, *, user_id: uuid.UUID) -> Customer:
-        queryset = Customer.objects.select_related("user")
-        return get_object(queryset, user_id=user_id)
+        if pk:
+            return get_object(queryset, pk=pk)
+        if user_id:
+            return get_object(queryset, user_id=user_id)
+        return None
 
     def customer_list(self, filters=None) -> QuerySet[Customer]:
         filters = filters or {}
@@ -25,3 +31,12 @@ class CustomerSelector:
         qs = Customer.objects.select_related("user").all()
 
         return CustomerFilter(filters, qs).qs
+
+
+class EmployeeSelector:
+    def __init__(self) -> None:
+        pass
+
+    def employee_get(self, *, user_id: uuid.UUID) -> Employee | None:
+        queryset = Employee.objects.select_related("user")
+        return get_object(queryset, user_id=user_id)
