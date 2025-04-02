@@ -21,7 +21,7 @@ class Customer(BaseModel):
         blank=True,
         null=True,
     )
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         db_index=True,
@@ -49,7 +49,7 @@ class Customer(BaseModel):
 
 class Employee(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         db_index=True,

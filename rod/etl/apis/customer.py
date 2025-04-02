@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +8,7 @@ from rest_framework.views import APIView
 from rod.common.pagination import get_paginated_response
 from rod.core.exceptions import ApplicationError
 from rod.etl.models import Customer
+from rod.etl.permission import CanViewCustomer
 from rod.etl.selectors import CustomerSelector
 from rod.etl.services import CustomerService
 from rod.users.serializers import UserSerializer
@@ -64,7 +64,7 @@ class MeCustomerUpdateApi(APIView):
 
 
 class AdminCustomerListApi(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated, CanViewCustomer]
 
     class Pagination(LimitOffsetPagination):
         default_limit = 10
@@ -114,7 +114,7 @@ class AdminCustomerListApi(APIView):
 
 
 class AdminCustomerDetailApi(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated, CanViewCustomer]
 
     class OutputSerializer(serializers.ModelSerializer):
         user = UserSerializer()
