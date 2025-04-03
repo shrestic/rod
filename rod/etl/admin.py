@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import customer
 from .models import employee
+from .models import plan
 
 
 # Register your models here.
@@ -35,3 +36,23 @@ class EmployeeAdmin(admin.ModelAdmin):
         "position",
         "department",
     ]
+
+
+@admin.register(plan.Plan)
+class PlanAdmin(admin.ModelAdmin):
+    list_display = [
+        "name",
+        "description",
+        "max_rows_processed",
+        "cost_per_million_rows",
+        "base_cost",
+    ]
+    list_per_page = 10
+    ordering = ["name"]
+
+
+@admin.register(plan.PlanFeature)
+class PlanFeatureAdmin(admin.ModelAdmin):
+    list_display = ["plan", "feature_name", "feature_description"]
+    list_per_page = 10
+    ordering = ["plan__name", "feature_name"]

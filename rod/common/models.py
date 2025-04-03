@@ -46,7 +46,7 @@ class RandomModel(BaseModel):
         constraints = [
             models.CheckConstraint(
                 name="start_date_before_end_date",
-                check=Q(start_date__lt=F("end_date")),
+                condition=Q(start_date__lt=F("end_date")),
                 violation_error_message="Start date must be before end date",
             ),
         ]

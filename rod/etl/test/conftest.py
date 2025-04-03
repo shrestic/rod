@@ -34,7 +34,7 @@ def employee_with_customer_permission(db, authenticate):
         user = authenticate(is_staff=True)
         user.save()
 
-        group, _ = Group.objects.get_or_create(name="Customer Support")
+        group, _ = Group.objects.get_or_create(name="Support Agent")
         user.groups.add(group)
 
         permission = Permission.objects.get(codename="view_customer")
