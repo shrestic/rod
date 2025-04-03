@@ -11,19 +11,19 @@ from rod.common.utils import make_mock_object
 class TestEmployee:
     def test_if_employee_can_get_customer_list_return_200(
         self,
-        employee_with_customer_permission,
+        make_employee_is_support_agent,
         api_client,
     ):
-        employee_with_customer_permission()
+        make_employee_is_support_agent()
         response = api_client.get("/etl/customers/")
         assert response.status_code == status.HTTP_200_OK
 
     def test_if_employee_can_get_filtered_customer_list_return_200(
         self,
-        employee_with_customer_permission,
+        make_employee_is_support_agent,
         api_client,
     ):
-        employee_with_customer_permission()
+        make_employee_is_support_agent()
 
         baker.make(
             "users.BaseUser",
@@ -41,10 +41,10 @@ class TestEmployee:
 
     def test_if_employee_can_get_customer_detail_return_200(
         self,
-        employee_with_customer_permission,
+        make_employee_is_support_agent,
         api_client,
     ):
-        employee_with_customer_permission()
+        make_employee_is_support_agent()
 
         # Create a mock user
         mock_user = make_mock_object(

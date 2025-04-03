@@ -21,8 +21,8 @@
         "testpass"
     ],
     "python.testing.pytestArgs": [
-        "rod"
+        "."
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
 }

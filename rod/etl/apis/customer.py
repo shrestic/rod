@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rod.common.pagination import get_paginated_response
 from rod.core.exceptions import ApplicationError
 from rod.etl.models.customer import Customer
-from rod.etl.permission import CanViewCustomer
+from rod.etl.permissions import IsSupportAgent
 from rod.etl.selectors.customer import CustomerSelector
 from rod.etl.services.customer import CustomerService
 from rod.users.serializers import UserSerializer
@@ -49,7 +49,7 @@ class MeCustomerUpdateApi(APIView):
             model = Customer
             fields = ["id", "phone", "address", "birth_date", "image"]
 
-    def put(self, request):
+    def patch(self, request):
         customer = CustomerSelector().customer_get(user_id=request.user.id)
         if customer is None:
             raise ApplicationError(message="Customer not found")
@@ -64,7 +64,7 @@ class MeCustomerUpdateApi(APIView):
 
 
 class AdminCustomerListApi(APIView):
-    permission_classes = [IsAuthenticated, CanViewCustomer]
+    permission_classes = [IsAuthenticated, IsSupportAgent]
 
     class Pagination(LimitOffsetPagination):
         default_limit = 10
@@ -114,7 +114,7 @@ class AdminCustomerListApi(APIView):
 
 
 class AdminCustomerDetailApi(APIView):
-    permission_classes = [IsAuthenticated, CanViewCustomer]
+    permission_classes = [IsAuthenticated, IsSupportAgent]
 
     class OutputSerializer(serializers.ModelSerializer):
         user = UserSerializer()

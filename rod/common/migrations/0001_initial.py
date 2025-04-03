@@ -40,6 +40,10 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='randommodel',
-            constraint=models.CheckConstraint(check=models.Q(('start_date__lt', models.F('end_date'))), name='start_date_before_end_date', violation_error_message='Start date must be before end date'),
+            constraint=models.CheckConstraint(
+                condition=models.Q(('start_date__lt', models.F('end_date'))),
+                name='start_date_before_end_date',
+                violation_error_message='Start date must be before end date'
+            ),
         ),
     ]

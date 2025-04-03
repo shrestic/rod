@@ -114,7 +114,7 @@ class TestCustomer:
             }
 
             # Act: Call the API to update the customer
-            response = api_client.put(
+            response = api_client.patch(
                 "/etl/customers/me/update/",
                 data=update_data,
                 format="json",

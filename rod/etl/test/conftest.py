@@ -1,7 +1,6 @@
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.contrib.auth.models import Permission
 from rest_framework.test import APIClient
 
 from rod.etl.models.employee import Employee
@@ -29,20 +28,31 @@ def authenticate(api_client):
 
 
 @pytest.fixture
-def employee_with_customer_permission(db, authenticate):
-    def make_employee_user():
+def make_employee_is_support_agent(db, authenticate):
+    def create_employee():
         user = authenticate(is_staff=True)
         user.save()
 
-        group, _ = Group.objects.get_or_create(name="Customer Support")
+        group, _ = Group.objects.get_or_create(name="Support Agent")
         user.groups.add(group)
+        user.save()
+        if not hasattr(user, "employee"):
+            Employee.objects.create(user=user)
 
-        permission = Permission.objects.get(codename="view_customer")
-        group.permissions.add(permission)
+    return create_employee
+
+
+@pytest.fixture
+def make_employee_is_product_admin(db, authenticate):
+    def create_employee():
+        user = authenticate(is_staff=True)
+        user.save()
+
+        group, _ = Group.objects.get_or_create(name="Product Admin")
+        user.groups.add(group)
+        user.save()
 
         if not hasattr(user, "employee"):
             Employee.objects.create(user=user)
 
-        return user
-
-    return make_employee_user
+    return create_employee
