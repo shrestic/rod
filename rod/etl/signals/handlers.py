@@ -2,8 +2,8 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from rod.etl.services import CustomerService
-from rod.etl.services import EmployeeService
+from rod.etl.services.customer import CustomerService
+from rod.etl.services.employee import EmployeeService
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

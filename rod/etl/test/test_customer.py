@@ -4,7 +4,7 @@ import pytest
 from rest_framework import status
 
 from rod.common.utils import make_mock_object
-from rod.etl.models import Customer
+from rod.etl.models.customer import Customer
 
 
 @pytest.mark.django_db
@@ -55,7 +55,7 @@ class TestCustomer:
 
         # Mock CustomerSelector
         with patch(
-            "rod.etl.selectors.CustomerSelector.customer_get",
+            "rod.etl.selectors.customer.CustomerSelector.customer_get",
             return_value=mock_customer,
         ):
             response = api_client.get("/etl/customers/me/")
@@ -98,11 +98,11 @@ class TestCustomer:
         # Mock CustomerSelector and CustomerService
         with (
             patch(
-                "rod.etl.selectors.CustomerSelector.customer_get",
+                "rod.etl.selectors.customer.CustomerSelector.customer_get",
                 return_value=mock_customer,
             ),
             patch(
-                "rod.etl.services.CustomerService.customer_update",
+                "rod.etl.services.customer.CustomerService.customer_update",
                 return_value=updated_mock_customer,
             ),
         ):
