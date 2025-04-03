@@ -98,7 +98,7 @@ class PlanUpdateApi(APIView):
         cost_per_million_rows = serializers.FloatField()
         base_cost = serializers.FloatField()
 
-    def put(self, request, pk):
+    def patch(self, request, pk):
         plan = PlanSelector().plan_get(plan_id=pk)
         if plan is None:
             raise ApplicationError(message="Plan not found")
@@ -149,7 +149,7 @@ class PlanFeatureUpdateApi(APIView):
         feature_name = serializers.CharField()
         feature_description = serializers.CharField()
 
-    def put(self, request, pk):
+    def patch(self, request, pk):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         plan_feature = PlanSelector().plan_feature_get(feature_id=pk)

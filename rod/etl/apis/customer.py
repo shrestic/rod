@@ -49,7 +49,7 @@ class MeCustomerUpdateApi(APIView):
             model = Customer
             fields = ["id", "phone", "address", "birth_date", "image"]
 
-    def put(self, request):
+    def patch(self, request):
         customer = CustomerSelector().customer_get(user_id=request.user.id)
         if customer is None:
             raise ApplicationError(message="Customer not found")

@@ -65,7 +65,7 @@ class MeEmployeeUpdateApi(APIView):
                 "user",
             ]
 
-    def put(self, request):
+    def patch(self, request):
         employee = EmployeeSelector().employee_get(user_id=request.user.id)
         if employee is None:
             raise ApplicationError(message="Employee not found")
