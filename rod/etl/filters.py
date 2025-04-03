@@ -4,7 +4,7 @@ from django_filters import DateFilter
 from django_filters import FilterSet
 from django_filters import UUIDFilter
 
-from rod.etl.models import Customer
+from rod.etl.models.customer import Customer
 
 
 class CustomerFilter(FilterSet):

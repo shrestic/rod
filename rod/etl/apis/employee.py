@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rod.core.exceptions import ApplicationError
-from rod.etl.models import Employee
-from rod.etl.selectors import EmployeeSelector
-from rod.etl.services import EmployeeService
+from rod.etl.models.employee import Employee
+from rod.etl.selectors.employee import EmployeeSelector
+from rod.etl.services.employee import EmployeeService
 from rod.users.serializers import UserSerializer
 
 # Create your api views here.

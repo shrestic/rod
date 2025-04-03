@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
 from rest_framework.test import APIClient
 
-from rod.etl.models import Employee
+from rod.etl.models.employee import Employee
 
 User = get_user_model()
 

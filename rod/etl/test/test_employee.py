@@ -66,7 +66,7 @@ class TestEmployee:
 
         # Mock CustomerSelector
         with patch(
-            "rod.etl.selectors.CustomerSelector.customer_get",
+            "rod.etl.selectors.customer.CustomerSelector.customer_get",
             return_value=mock_customer,
         ):
             response = api_client.get(

@@ -7,10 +7,10 @@ from rest_framework.views import APIView
 
 from rod.common.pagination import get_paginated_response
 from rod.core.exceptions import ApplicationError
-from rod.etl.models import Customer
+from rod.etl.models.customer import Customer
 from rod.etl.permission import CanViewCustomer
-from rod.etl.selectors import CustomerSelector
-from rod.etl.services import CustomerService
+from rod.etl.selectors.customer import CustomerSelector
+from rod.etl.services.customer import CustomerService
 from rod.users.serializers import UserSerializer
 
 # Create your api views here.

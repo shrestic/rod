@@ -1,10 +1,11 @@
 from django.contrib import admin
 
-from . import models
+from .models import customer
+from .models import employee
 
 
 # Register your models here.
-@admin.register(models.Customer)
+@admin.register(customer.Customer)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ["first_name", "last_name", "phone", "address", "birth_date"]
     list_per_page = 10
@@ -13,7 +14,7 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ["user__first_name__istartswith", "user__last_name__istartswith"]
 
 
-@admin.register(models.Employee)
+@admin.register(employee.Employee)
 class EmployeeAdmin(admin.ModelAdmin):
     list_display = [
         "first_name",

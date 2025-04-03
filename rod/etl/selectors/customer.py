@@ -4,8 +4,7 @@ from django.db.models.query import QuerySet
 
 from rod.common.utils import get_object
 from rod.etl.filters import CustomerFilter
-from rod.etl.models import Customer
-from rod.etl.models import Employee
+from rod.etl.models.customer import Customer
 
 
 class CustomerSelector:
@@ -31,12 +30,3 @@ class CustomerSelector:
         qs = Customer.objects.select_related("user").all()
 
         return CustomerFilter(filters, qs).qs
-
-
-class EmployeeSelector:
-    def __init__(self) -> None:
-        pass
-
-    def employee_get(self, *, user_id: uuid.UUID) -> Employee | None:
-        queryset = Employee.objects.select_related("user")
-        return get_object(queryset, user_id=user_id)
