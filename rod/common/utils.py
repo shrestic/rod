@@ -64,3 +64,7 @@ def inline_serializer(*, fields, data=None, **kwargs):
         return serializer_class(data=data, **kwargs)
 
     return serializer_class(**kwargs)
+
+
+def user_in_group(user, group_name: str) -> bool:
+    return user.groups.filter(name__iexact=group_name).exists()

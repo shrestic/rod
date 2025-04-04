@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from rod.etl.models import subscription
+
 from .models import customer
 from .models import employee
 from .models import plan
@@ -56,3 +58,18 @@ class PlanFeatureAdmin(admin.ModelAdmin):
     list_display = ["plan", "feature_name", "feature_description"]
     list_per_page = 10
     ordering = ["plan__name", "feature_name"]
+
+
+@admin.register(subscription.Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = [
+        "customer",
+        "plan",
+        "start_date",
+        "end_date",
+        "is_active",
+        "billing_cycle_day",
+        "billing_frequency",
+    ]
+    list_per_page = 10
+    ordering = ["customer__user__first_name", "customer__user__last_name"]
