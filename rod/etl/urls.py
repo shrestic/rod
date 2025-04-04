@@ -17,6 +17,10 @@ from rod.etl.apis.plan import PlanFeatureListApi
 from rod.etl.apis.plan import PlanFeatureUpdateApi
 from rod.etl.apis.plan import PlanListApi
 from rod.etl.apis.plan import PlanUpdateApi
+from rod.etl.apis.subscription import SubscriptionCancelAPI
+from rod.etl.apis.subscription import SubscriptionCreateAPI
+from rod.etl.apis.subscription import SubscriptionDetailAPI
+from rod.etl.apis.subscription import SubscriptionListAPI
 
 # Customer
 customer_patterns = [
@@ -54,10 +58,19 @@ plan_feature_patterns = [
     path("<int:pk>/delete/", PlanFeatureDeleteApi.as_view(), name="delete"),
 ]
 
+# Subscription
+subscription_patterns = [
+    path("", SubscriptionListAPI.as_view(), name="list"),
+    path("create/", SubscriptionCreateAPI.as_view(), name="create"),
+    path("<uuid:pk>/", SubscriptionDetailAPI.as_view(), name="detail"),
+    path("me/", SubscriptionDetailAPI.as_view(), name="me"),
+    path("me/cancel/", SubscriptionCancelAPI.as_view(), name="cancel"),
+]
 
 urlpatterns = [
     path("customers/", include((customer_patterns, "customers"))),
     path("employees/", include((employee_patterns, "employees"))),
     path("plans/", include((plan_patterns, "plans"))),
     path("plan-features/", include((plan_feature_patterns, "plan-features"))),
+    path("subscriptions/", include((subscription_patterns, "subscriptions"))),
 ]
