@@ -58,7 +58,9 @@ class SubscriptionDetailAPI(APIView):
 
     def get(self, request, pk=None):
         if user_in_group(request.user, "Product Admin") and pk is not None:
-            subscription = SubscriptionSelector().subscription_get_by_id(pk=pk)
+            subscription = SubscriptionSelector().subscription_get_by_id(
+                subscription_id=pk,
+            )
         elif user_in_group(request.user, "Customer") and pk is None:
             customer_id = CustomerSelector().customer_get(user_id=request.user.id).id
             if customer_id is None:
@@ -66,6 +68,10 @@ class SubscriptionDetailAPI(APIView):
             subscription = SubscriptionSelector().subscription_get_by_customer(
                 customer_id=customer_id,
             )
+            if subscription is None:
+                raise ApplicationError(message="Subscription not found")
+        else:
+            raise ApplicationError(message="Invalid access")
         serializer = self.OutputSerializer(subscription)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

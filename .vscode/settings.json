@@ -8,6 +8,7 @@
         "djoser",
         "einfo",
         "fakeadmin",
+        "fakeuser",
         "filterset",
         "gethostname",
         "levelname",
