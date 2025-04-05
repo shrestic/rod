@@ -90,7 +90,9 @@ LOCAL_APPS = [
     "rod.common",
     "rod.core",
     "rod.email",
-    "rod.etl",
+    "rod.accounts",
+    "rod.billing",
+    "rod.plan",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

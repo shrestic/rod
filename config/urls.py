@@ -24,7 +24,9 @@ urlpatterns = [
     path("auth/", include("djoser.social.urls")),
     path("auth/", include("social_django.urls", namespace="social")),
     # Your stuff: custom urls includes go here
-    path("etl/", include("rod.etl.urls")),
+    path("billing/", include("rod.billing.urls")),
+    path("plan/", include("rod.plan.urls")),
+    path("accounts/", include("rod.accounts.urls")),
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]
