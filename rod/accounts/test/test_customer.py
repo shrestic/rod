@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from rest_framework import status
 
-from rod.accounts.models import Customer
+from rod.accounts.models.customer_model import Customer
 from rod.common.utils import make_mock_object
 
 

@@ -142,6 +142,33 @@ class PlanFeatureCreateApi(APIView):
         return Response(plan_feature.id, status=status.HTTP_201_CREATED)
 
 
+class PlanFeatureBulkCreateApi(APIView):
+    permission_classes = [IsAuthenticated, IsProductAdmin]
+
+    class InputSerializer(serializers.Serializer):
+        feature_name = serializers.CharField()
+        feature_description = serializers.CharField()
+
+    def post(self, request, pk):
+        if not isinstance(request.data, list):
+            raise ApplicationError(
+                message="Expected a list of features.",
+            )
+
+        serializer = self.InputSerializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+
+        plan = PlanSelector().plan_get(plan_id=pk)
+        if plan is None:
+            raise ApplicationError(message="Plan not found")
+        PlanFeatureService().plan_feature_bulk_create(
+            plan=plan,
+            features_data=serializer.validated_data,
+        )
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
 class PlanFeatureUpdateApi(APIView):
     permission_classes = [IsAuthenticated, IsProductAdmin]
 
@@ -187,6 +214,9 @@ class PlanFeatureListApi(APIView):
             fields = ["id", "feature_name", "feature_description"]
 
     def get(self, request, pk):
+        plan = PlanSelector().plan_get(plan_id=pk)
+        if plan is None:
+            raise ApplicationError(message="Plan with given id not found")
         plan_features = PlanSelector().plan_features_list(plan_id=pk)
         serializer = self.OutputSerializer(plan_features, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

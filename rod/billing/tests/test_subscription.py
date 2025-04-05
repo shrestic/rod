@@ -3,18 +3,18 @@ from django.urls import reverse
 from model_bakery import baker
 from rest_framework import status
 
-from rod.plan.models import Plan
+from rod.plan.models.plan_model import Plan
 
 
 @pytest.mark.django_db
 class TestSubscription:
     def test_if_user_is_customer_can_create_subscription_return_201(
         self,
-        make_customer_user,
+        make_customer,
         api_client,
     ):
         # Arrange
-        make_customer_user()
+        make_customer()
         plan = baker.make(Plan)
         url = reverse("subscriptions:create")
         data = {"plan_id": plan.id}

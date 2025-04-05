@@ -322,6 +322,37 @@ class TestPlan:
         assert response.status_code == status.HTTP_201_CREATED
         assert PlanFeature.objects.filter(feature_name="Test Feature").exists()
 
+    def test_if_employee_is_product_admin_can_bulk_create_plan_feature_return_201(
+        self,
+        api_client,
+        make_employee_is_product_admin,
+    ):
+        # Arrange
+        make_employee_is_product_admin()
+        plan = baker.make(Plan)
+        data = [
+            {
+                "feature_name": "Test Feature 1",
+                "feature_description": "Test Description 1",
+            },
+            {
+                "feature_name": "Test Feature 2",
+                "feature_description": "Test Description 2",
+            },
+        ]
+
+        # Act
+        response = api_client.post(
+            f"/plan/plans/{plan.id}/features/bulk-create/",
+            data=data,
+            format="json",
+        )
+
+        # Assert
+        assert response.status_code == status.HTTP_201_CREATED
+        assert PlanFeature.objects.filter(feature_name="Test Feature 1").exists()
+        assert PlanFeature.objects.filter(feature_name="Test Feature 2").exists()
+
     def test_if_employee_is_product_admin_can_update_plan_feature_return_200(
         self,
         api_client,

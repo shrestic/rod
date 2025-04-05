@@ -60,6 +60,22 @@ class PlanFeatureService:
             feature_description=feature_description,
         )
 
+    def plan_feature_bulk_create(
+        self,
+        *,
+        plan: Plan,
+        features_data: list[dict],
+    ) -> list[PlanFeature]:
+        features = [
+            PlanFeature(
+                plan=plan,
+                feature_name=item["feature_name"],
+                feature_description=item["feature_description"],
+            )
+            for item in features_data
+        ]
+        return PlanFeature.objects.bulk_create(features)
+
     def plan_feature_update(
         self,
         *,

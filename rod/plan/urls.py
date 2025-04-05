@@ -4,6 +4,7 @@ from django.urls import path
 from rod.plan.apis.plan_api import PlanCreateApi
 from rod.plan.apis.plan_api import PlanDeleteApi
 from rod.plan.apis.plan_api import PlanDetailApi
+from rod.plan.apis.plan_api import PlanFeatureBulkCreateApi
 from rod.plan.apis.plan_api import PlanFeatureCreateApi
 from rod.plan.apis.plan_api import PlanFeatureDeleteApi
 from rod.plan.apis.plan_api import PlanFeatureDetailApi
@@ -24,6 +25,11 @@ plan_patterns = [
         "<int:pk>/features/create/",
         PlanFeatureCreateApi.as_view(),
         name="feature-create",
+    ),
+    path(
+        "<int:pk>/features/bulk-create/",
+        PlanFeatureBulkCreateApi.as_view(),
+        name="feature-bulk-create",
     ),
 ]
 
