@@ -6,6 +6,7 @@ from django.db import models
 
 from rod.accounts.validators import UserValidator
 from rod.common.models import BaseModel
+from rod.etl.utils.kms_helper import KMSHelper
 
 PHONE_LENGTH = 10
 
@@ -13,6 +14,7 @@ PHONE_LENGTH = 10
 # Create your models here.
 class Customer(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    kms_key_id = models.CharField(max_length=500, blank=True, default="")
     phone = models.CharField(max_length=PHONE_LENGTH, default="", blank=True)
     address = models.TextField(default="", blank=True)
     birth_date = models.DateField(null=True, blank=True)
@@ -29,6 +31,12 @@ class Customer(BaseModel):
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
+
+    def set_new_kms_key_id(self):
+        self.kms_key_id = KMSHelper().create_kms_key_for_customer(
+            customer_id=self.id,
+        )
+        self.save()
 
     @admin.display(ordering="user__first_name")
     def first_name(self):

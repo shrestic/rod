@@ -11,6 +11,7 @@ class CustomerService:
         customer = Customer(user=user)
         customer.full_clean()
         customer.save()
+        customer.set_new_kms_key_id()
         return customer
 
     def customer_update(self, *, customer: Customer, data) -> Customer:

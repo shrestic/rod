@@ -3,8 +3,8 @@ import uuid
 from django.db.models.query import QuerySet
 
 from rod.accounts.filters import CustomerFilter
+from rod.accounts.models.customer_model import Customer
 from rod.common.utils import get_object
-from rod.etl.models.customer import Customer
 
 
 class CustomerSelector:
