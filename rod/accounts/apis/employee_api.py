@@ -20,7 +20,6 @@ class MeEmployeeDetailApi(APIView):
         class Meta:
             model = Employee
             fields = [
-                "id",
                 "phone",
                 "address",
                 "birth_date",
@@ -53,7 +52,6 @@ class MeEmployeeUpdateApi(APIView):
         class Meta:
             model = Employee
             fields = [
-                "id",
                 "phone",
                 "address",
                 "birth_date",

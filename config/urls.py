@@ -27,6 +27,7 @@ urlpatterns = [
     path("billing/", include("rod.billing.urls")),
     path("plan/", include("rod.plan.urls")),
     path("accounts/", include("rod.accounts.urls")),
+    path("etl/", include("rod.etl.urls")),
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]

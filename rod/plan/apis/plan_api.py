@@ -22,12 +22,10 @@ class PlanListApi(APIView):
         class Meta:
             model = Plan
             fields = [
-                "id",
                 "name",
+                "code",
                 "description",
-                "max_rows_processed",
-                "cost_per_million_rows",
-                "base_cost",
+                "cost",
             ]
 
     def get(self, request):
@@ -44,25 +42,23 @@ class PlanDetailApi(APIView):
             many=True,
             fields={
                 "id": serializers.UUIDField(),
-                "feature_name": serializers.CharField(),
-                "feature_description": serializers.CharField(),
+                "name": serializers.CharField(),
+                "description": serializers.CharField(),
             },
         )
 
         class Meta:
             model = Plan
             fields = [
-                "id",
                 "name",
+                "code",
                 "description",
-                "max_rows_processed",
-                "cost_per_million_rows",
-                "base_cost",
+                "cost",
                 "features",
             ]
 
-    def get(self, request, pk):
-        plan = PlanSelector().plan_get(plan_id=pk)
+    def get(self, request, code):
+        plan = PlanSelector().plan_get(code=code)
         if plan is None:
             raise ApplicationError(message="Plan not found")
         serializer = self.OutputSerializer(plan)
@@ -74,18 +70,19 @@ class PlanCreateApi(APIView):
 
     class InputSerializer(serializers.Serializer):
         name = serializers.CharField()
+        code = serializers.CharField()
         description = serializers.CharField()
-        max_rows_processed = serializers.IntegerField()
-        cost_per_million_rows = serializers.FloatField()
-        base_cost = serializers.FloatField()
+        cost = serializers.FloatField()
 
     def post(self, request):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        if PlanSelector().plan_get(code=serializer.validated_data["code"]):
+            raise ApplicationError(message="Plan with given code already exists")
         plan = PlanService().plan_create(
             **serializer.validated_data,
         )
-        return Response(plan.id, status=status.HTTP_201_CREATED)
+        return Response(plan.code, status=status.HTTP_201_CREATED)
 
 
 class PlanUpdateApi(APIView):
@@ -93,13 +90,12 @@ class PlanUpdateApi(APIView):
 
     class InputSerializer(serializers.Serializer):
         name = serializers.CharField()
+        code = serializers.CharField()
         description = serializers.CharField()
-        max_rows_processed = serializers.IntegerField()
-        cost_per_million_rows = serializers.FloatField()
-        base_cost = serializers.FloatField()
+        cost = serializers.FloatField()
 
-    def patch(self, request, pk):
-        plan = PlanSelector().plan_get(plan_id=pk)
+    def patch(self, request, code):
+        plan = PlanSelector().plan_get(code=code)
         if plan is None:
             raise ApplicationError(message="Plan not found")
         serializer = self.InputSerializer(data=request.data)
@@ -108,14 +104,14 @@ class PlanUpdateApi(APIView):
             plan=plan,
             data=serializer.validated_data,
         )
-        return Response(plan.id, status=status.HTTP_200_OK)
+        return Response(plan.code, status=status.HTTP_200_OK)
 
 
 class PlanDeleteApi(APIView):
     permission_classes = [IsAuthenticated, IsProductAdmin]
 
-    def delete(self, request, pk):
-        plan = PlanSelector().plan_get(plan_id=pk)
+    def delete(self, request, code):
+        plan = PlanSelector().plan_get(code=code)
         if plan is None:
             raise ApplicationError(message="Plan not found")
         PlanService().plan_delete(plan=plan)
@@ -126,30 +122,39 @@ class PlanFeatureCreateApi(APIView):
     permission_classes = [IsAuthenticated, IsProductAdmin]
 
     class InputSerializer(serializers.Serializer):
-        feature_name = serializers.CharField()
-        feature_description = serializers.CharField()
+        plan_code = serializers.CharField()
+        code = serializers.CharField()
+        name = serializers.CharField()
+        description = serializers.CharField()
 
-    def post(self, request, pk):
+    def post(self, request):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        plan = PlanSelector().plan_get(plan_id=pk)
+        plan_code = serializer.validated_data["plan_code"]
+        code = serializer.validated_data["code"]
+        name = serializer.validated_data["name"]
+        description = serializer.validated_data["description"]
+        plan = PlanSelector().plan_get(code=plan_code)
         if plan is None:
             raise ApplicationError(message="Plan not found")
         plan_feature = PlanFeatureService().plan_feature_create(
             plan=plan,
-            **serializer.validated_data,
+            code=code,
+            name=name,
+            description=description,
         )
-        return Response(plan_feature.id, status=status.HTTP_201_CREATED)
+        return Response(plan_feature.code, status=status.HTTP_201_CREATED)
 
 
 class PlanFeatureBulkCreateApi(APIView):
     permission_classes = [IsAuthenticated, IsProductAdmin]
 
     class InputSerializer(serializers.Serializer):
-        feature_name = serializers.CharField()
-        feature_description = serializers.CharField()
+        code = serializers.CharField()
+        name = serializers.CharField()
+        description = serializers.CharField()
 
-    def post(self, request, pk):
+    def post(self, request, code):
         if not isinstance(request.data, list):
             raise ApplicationError(
                 message="Expected a list of features.",
@@ -158,7 +163,7 @@ class PlanFeatureBulkCreateApi(APIView):
         serializer = self.InputSerializer(data=request.data, many=True)
         serializer.is_valid(raise_exception=True)
 
-        plan = PlanSelector().plan_get(plan_id=pk)
+        plan = PlanSelector().plan_get(code=code)
         if plan is None:
             raise ApplicationError(message="Plan not found")
         PlanFeatureService().plan_feature_bulk_create(
@@ -173,20 +178,21 @@ class PlanFeatureUpdateApi(APIView):
     permission_classes = [IsAuthenticated, IsProductAdmin]
 
     class InputSerializer(serializers.Serializer):
-        feature_name = serializers.CharField()
-        feature_description = serializers.CharField()
+        name = serializers.CharField()
+        code = serializers.CharField()
+        description = serializers.CharField()
 
     def patch(self, request, pk):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        plan_feature = PlanSelector().plan_feature_get(feature_id=pk)
+        plan_feature = PlanSelector().plan_feature_get(id=pk)
         if plan_feature is None:
             raise ApplicationError(message="Plan feature not found")
         plan_feature = PlanFeatureService().plan_feature_update(
             plan_feature=plan_feature,
             data=serializer.validated_data,
         )
-        return Response(plan_feature.id, status=status.HTTP_200_OK)
+        return Response(plan_feature.code, status=status.HTTP_200_OK)
 
 
 class PlanFeatureDetailApi(APIView):
@@ -195,10 +201,10 @@ class PlanFeatureDetailApi(APIView):
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
             model = PlanFeature
-            fields = ["id", "feature_name", "feature_description"]
+            fields = ["name", "description"]
 
     def get(self, request, pk):
-        plan_feature = PlanSelector().plan_feature_get(feature_id=pk)
+        plan_feature = PlanSelector().plan_feature_get(id=pk)
         if plan_feature is None:
             raise ApplicationError(message="Plan feature not found")
         serializer = self.OutputSerializer(plan_feature)
@@ -211,13 +217,13 @@ class PlanFeatureListApi(APIView):
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
             model = PlanFeature
-            fields = ["id", "feature_name", "feature_description"]
+            fields = ["name", "description"]
 
-    def get(self, request, pk):
-        plan = PlanSelector().plan_get(plan_id=pk)
+    def get(self, request, code):
+        plan = PlanSelector().plan_get(code=code)
         if plan is None:
-            raise ApplicationError(message="Plan with given id not found")
-        plan_features = PlanSelector().plan_features_list(plan_id=pk)
+            raise ApplicationError(message="Plan with given code not found")
+        plan_features = PlanSelector().plan_features_list(plan_code=code)
         serializer = self.OutputSerializer(plan_features, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -226,7 +232,7 @@ class PlanFeatureDeleteApi(APIView):
     permission_classes = [IsAuthenticated, IsProductAdmin]
 
     def delete(self, request, pk):
-        plan_feature = PlanSelector().plan_feature_get(feature_id=pk)
+        plan_feature = PlanSelector().plan_feature_get(id=pk)
         if plan_feature is None:
             raise ApplicationError(message="Plan feature not found")
         PlanFeatureService().plan_feature_delete(plan_feature=plan_feature)

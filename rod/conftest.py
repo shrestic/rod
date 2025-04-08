@@ -1,4 +1,5 @@
 import uuid
+from unittest.mock import patch
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -66,7 +67,7 @@ def make_employee_is_support_agent(db, authenticate):
         user = authenticate(is_staff=True)
         user.save()
 
-        group, _ = Group.objects.get_or_create(name="Support Agent")
+        group, _ = Group.objects.get_or_create(name="Support")
         user.groups.add(group)
 
         if not hasattr(user, "employee"):
@@ -88,3 +89,12 @@ def make_employee_is_product_admin(db, authenticate):
             Employee.objects.create(user=user)
 
     return create_employee
+
+
+@pytest.fixture(autouse=True)
+def patch_kms_customer_level():
+    with patch("rod.accounts.models.customer_model.KMSUtil") as mock_kms_util:
+        mock_kms_util.return_value.create_kms_key_for_customer.return_value = (
+            "mock-kms-key"
+        )
+        yield mock_kms_util

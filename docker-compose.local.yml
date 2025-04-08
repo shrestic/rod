@@ -19,6 +19,7 @@ services:
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
+      - ./.envs/.local/.aws
     environment:
       - DJANGO_READ_DOT_ENV_FILE=True
     ports:

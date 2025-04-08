@@ -5,12 +5,17 @@ from rod.common.utils import user_in_group
 
 class IsSupportAgent(BasePermission):
     def has_permission(self, request, view):
-        return user_in_group(request.user, "Support Agent")
+        return user_in_group(request.user, "Support")
 
 
 class IsProductAdmin(BasePermission):
     def has_permission(self, request, view):
         return user_in_group(request.user, "Product Admin")
+
+
+class IsETLTeam(BasePermission):
+    def has_permission(self, request, view):
+        return user_in_group(request.user, "ETL Team")
 
 
 class IsCustomer(BasePermission):

@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 from rod.billing.models.subscription_model import Subscription
@@ -5,56 +7,51 @@ from rod.common.models import BaseModel
 from rod.etl.models.connector_model import ConnectorInstance
 
 
-class DeployedPipeline(BaseModel):
+class Pipeline(BaseModel):
+    class StatusChoices(models.TextChoices):
+        PENDING = "PENDING", "Pending"
+        DEPLOYING = "DEPLOYING", "Deploying"
+        ACTIVE = "ACTIVE", "Active"
+        FAILED = "FAILED", "Failed"
+        STOPPED = "STOPPED", "Stopped"
+        DELETED = "DELETED", "Deleted"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
-    source_connector = models.ForeignKey(
+    connector_instance = models.ForeignKey(
         ConnectorInstance,
         on_delete=models.CASCADE,
-        related_name="source_connector",
+        related_name="pipelines",
     )
-    destination_connector = models.ForeignKey(
-        ConnectorInstance,
-        on_delete=models.CASCADE,
-        related_name="destination_connector",
+    status = models.CharField(
+        max_length=20,
+        choices=StatusChoices.choices,
+        default=StatusChoices.PENDING,
     )
-    sync_frequency = models.CharField(max_length=255)
-    status = models.CharField(max_length=255)
-    deployed_at = models.DateTimeField()
     notes = models.TextField()
 
     def __str__(self):
-        return (
-            f"{self.subscription.customer.name} - "
-            f"{self.source_connector.connector.name} to "
-            f"{self.destination_connector.connector.name}"
-        )
+        return f"{self.id}"
 
 
-class PipelineDatasetMapping(BaseModel):
-    SYNC_MODE_FULL = "full"
-    SYNC_MODE_INCREMENTAL = "incremental"
-    SYNC_MODE_CHOICES = [
-        (SYNC_MODE_FULL, "Full"),
-        (SYNC_MODE_INCREMENTAL, "Incremental"),
-    ]
-    deployed_pipeline = models.ForeignKey(DeployedPipeline, on_delete=models.CASCADE)
-    source_table_name = models.CharField(max_length=255)
-    destination_table_name = models.CharField(max_length=255)
-    column_mapping = models.JSONField()
-    sync_mode = models.CharField(max_length=255, choices=SYNC_MODE_CHOICES)
-    cursor_field = models.CharField(max_length=255)
-    last_synced_at = models.DateTimeField()
+class PipelineInstance(BaseModel):
+    class StatusChoices(models.TextChoices):
+        STARTED = "STARTED", "Started"
+        RUNNING = "RUNNING", "Running"
+        SUCCESS = "SUCCESS", "Success"
+        FAILED = "FAILED", "Failed"
+        CANCELLED = "CANCELLED", "Cancelled"
 
-
-class PipelineRunLog(BaseModel):
-    deployed_pipeline = models.ForeignKey(DeployedPipeline, on_delete=models.CASCADE)
-    run_id = models.CharField(max_length=255)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    pipeline = models.ForeignKey(Pipeline, on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    rows_synced = models.BigIntegerField()
-    status = models.CharField(max_length=255)
-    error = models.TextField()
-    log_data = models.JSONField()
+    status = models.CharField(
+        max_length=20,
+        choices=StatusChoices.choices,
+        default=StatusChoices.STARTED,
+    )
+    error = models.TextField(blank=True, default="")
 
     def __str__(self):
-        return f"{self.deployed_pipeline.subscription.customer.name} - {self.run_id}"
+        return f"{self.id}"

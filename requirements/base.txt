@@ -9,6 +9,7 @@ django-celery-beat==2.7.0  # https://github.com/celery/django-celery-beat
 flower==2.0.1  # https://github.com/mher/flower
 uvicorn[standard]==0.34.0  # https://github.com/encode/uvicorn
 uvicorn-worker==0.3.0  # https://github.com/Kludex/uvicorn-worker
+sqlalchemy==2.0.30
 
 # Django
 # ------------------------------------------------------------------------------
@@ -33,3 +34,13 @@ qrcode==8.1
 
 # AWS
 boto3==1.37.28
+
+#Dataprocessing
+pandas==2.2.3
+polars==1.26.0
+pyarrow==19.0.1
+fastexcel==0.13.0
+openpyxl==3.1.5
+psycopg2-binary==2.9.10
+PyMySQL==1.1.1
+pymssql==2.3.4

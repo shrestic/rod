@@ -22,7 +22,7 @@ class MeCustomerDetailApi(APIView):
 
         class Meta:
             model = Customer
-            fields = ["id", "phone", "address", "birth_date", "image", "user"]
+            fields = ["phone", "address", "birth_date", "image", "user"]
 
     def get(self, request):
         customer = CustomerSelector().customer_get(user_id=request.user.id)
@@ -45,7 +45,7 @@ class MeCustomerUpdateApi(APIView):
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
             model = Customer
-            fields = ["id", "phone", "address", "birth_date", "image"]
+            fields = ["phone", "address", "birth_date", "image"]
 
     def patch(self, request):
         customer = CustomerSelector().customer_get(user_id=request.user.id)
@@ -92,7 +92,7 @@ class AdminCustomerListApi(APIView):
 
         class Meta:
             model = Customer
-            fields = ["id", "phone", "address", "birth_date", "image", "user"]
+            fields = ["phone", "address", "birth_date", "image", "user"]
 
     def get(self, request):
         filters_serializer = self.FilterSerializer(data=request.query_params)
@@ -119,7 +119,7 @@ class AdminCustomerDetailApi(APIView):
 
         class Meta:
             model = Customer
-            fields = ["id", "phone", "address", "birth_date", "image", "user"]
+            fields = ["phone", "address", "birth_date", "image", "user"]
 
     def get(self, request, pk):
         customer = CustomerSelector().customer_get(pk=pk)

@@ -17,17 +17,12 @@ from rod.plan.apis.plan_api import PlanUpdateApi
 plan_patterns = [
     path("", PlanListApi.as_view(), name="list"),
     path("create/", PlanCreateApi.as_view(), name="create"),
-    path("<int:pk>/", PlanDetailApi.as_view(), name="detail"),
-    path("<int:pk>/update/", PlanUpdateApi.as_view(), name="update"),
-    path("<int:pk>/delete/", PlanDeleteApi.as_view(), name="delete"),
-    path("<int:pk>/features/", PlanFeatureListApi.as_view(), name="feature-list"),
+    path("<str:code>/", PlanDetailApi.as_view(), name="detail"),
+    path("<str:code>/update/", PlanUpdateApi.as_view(), name="update"),
+    path("<str:code>/delete/", PlanDeleteApi.as_view(), name="delete"),
+    path("<str:code>/features/", PlanFeatureListApi.as_view(), name="feature-list"),
     path(
-        "<int:pk>/features/create/",
-        PlanFeatureCreateApi.as_view(),
-        name="feature-create",
-    ),
-    path(
-        "<int:pk>/features/bulk-create/",
+        "<str:code>/features/bulk-create/",
         PlanFeatureBulkCreateApi.as_view(),
         name="feature-bulk-create",
     ),
@@ -35,6 +30,7 @@ plan_patterns = [
 
 # Plan Feature
 plan_feature_patterns = [
+    path("create/", PlanFeatureCreateApi.as_view(), name="create"),
     path("<int:pk>/", PlanFeatureDetailApi.as_view(), name="detail"),
     path("<int:pk>/update/", PlanFeatureUpdateApi.as_view(), name="update"),
     path("<int:pk>/delete/", PlanFeatureDeleteApi.as_view(), name="delete"),

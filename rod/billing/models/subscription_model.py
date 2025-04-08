@@ -11,13 +11,30 @@ from rod.plan.models.plan_model import Plan
 # Create your models here.
 class Subscription(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="subscription",
+    )
+    plan = models.ForeignKey(
+        Plan,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="subscription",
+    )
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     billing_cycle_day = models.CharField(max_length=255)
     billing_frequency = models.CharField(max_length=255)
+
+    @property
+    def customer_key_id(self):
+        try:
+            return self.customer.kms_key_id
+        except Exception:  # noqa: BLE001
+            return None
 
     def __str__(self):
         return f"{self.customer.name} - {self.plan.name}"

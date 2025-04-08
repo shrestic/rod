@@ -73,7 +73,6 @@ class TestEmployee:
                 "/accounts/customers/123e4567-e89b-12d3-a456-426614174004/",
             )
             assert response.status_code == status.HTTP_200_OK
-            assert response.data["id"] == "123e4567-e89b-12d3-a456-426614174004"
             assert response.data["phone"] == "0987654321"
             assert response.data["address"] == "Old Address"
             assert response.data["birth_date"] == "1990-01-01"

@@ -13,7 +13,7 @@ class SubscriptionSelector:
     def subscription_list(self) -> QuerySet[Subscription]:
         return Subscription.objects.all()
 
-    def subscription_get_by_id(self, *, subscription_id: int) -> Subscription:
+    def subscription_get_by_id(self, *, subscription_id: uuid.UUID) -> Subscription:
         return get_object(Subscription, id=subscription_id)
 
     def subscription_get_by_customer(

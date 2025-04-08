@@ -4,7 +4,9 @@ from rod.billing.models.subscription_model import Subscription
 from rod.common.services import model_update
 from rod.etl.models.connector_model import Connector
 from rod.etl.models.connector_model import ConnectorInstance
-from rod.etl.utils.kms_helper import KMSHelper
+from rod.etl.tasks.connector_tasks import run_connector_instance_check
+from rod.etl.tasks.connector_tasks import run_connector_instance_discover_schema
+from rod.etl.utils.utils import KMSUtil
 
 
 class ConnectorService:
@@ -14,14 +16,16 @@ class ConnectorService:
     def connector_create(
         self,
         *,
-        name: str,
-        description: str,
-        type: str,  # noqa: A002
+        label: str,
+        code: str,
+        config_form: dict,
+        input_type: str,
     ) -> Connector:
         return Connector.objects.create(
-            name=name,
-            description=description,
-            type=type,
+            label=label,
+            code=code,
+            config_form=config_form,
+            input_type=input_type,
         )
 
     def connector_update(
@@ -31,9 +35,10 @@ class ConnectorService:
         data: dict,
     ) -> Connector:
         fields: list[str] = [
-            "name",
-            "description",
-            "type",
+            "label",
+            "code",
+            "config_form",
+            "input_type",
         ]
         connector, has_updated = model_update(
             instance=connector,
@@ -55,35 +60,54 @@ class ConnectorInstanceService:
         *,
         subscription: Subscription,
         connector: Connector,
-        status: str,
         config: dict,
     ) -> ConnectorInstance:
-        connector_instance = ConnectorInstance(
+        plaintext = json.dumps(config)
+        customer_key_id = subscription.customer_key_id
+        encrypted_config = KMSUtil().encrypt(customer_key_id, plaintext)
+
+        return ConnectorInstance.objects.create(
             subscription=subscription,
             connector=connector,
-            status=status,
+            schema_snapshot={},
+            encrypted_config=encrypted_config,
+            status=ConnectorInstance.StatusChoices.NONE,
         )
-        plaintext = json.dumps(config)
-        connector_instance.encrypted_config = KMSHelper().encrypt(plaintext)
-        connector_instance.save()
 
-        return connector_instance
-
-    def connector_instance_update(
+    def connector_instance_update_config(
         self,
+        *,
         connector_instance: ConnectorInstance,
-        status: str,
-        config: dict,
+        new_config: dict,
     ) -> ConnectorInstance:
-        plaintext = json.dumps(config)
-        connector_instance.encrypted_config = KMSHelper().encrypt(plaintext)
-        connector_instance.save()
+        plaintext = json.dumps(new_config)
+        customer_key_id = connector_instance.customer_key_id
+        encrypted_config = KMSUtil().encrypt(customer_key_id, plaintext)
+        connector_instance.encrypted_config = encrypted_config
+        connector_instance.save(update_fields=["encrypted_config"])
+
         return connector_instance
 
     def connector_instance_delete(
         self,
         *,
-        config: dict,
         connector_instance: ConnectorInstance,
     ) -> None:
         connector_instance.delete()
+
+    def connector_instance_check(
+        self,
+        connector_instance: ConnectorInstance,
+    ) -> None:
+        run_connector_instance_check.delay(connector_instance.id)
+
+    def connector_instance_discover_schema(
+        self,
+        connector_instance: ConnectorInstance,
+    ) -> None:
+        connector_instance.schema_status = (
+            ConnectorInstance.SchemaStatusChoices.DISCOVERING
+        )
+        connector_instance.save(update_fields=["schema_status"])
+
+        run_connector_instance_discover_schema.delay(connector_instance.id)

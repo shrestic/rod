@@ -11,26 +11,23 @@ class PlanService:
         self,
         *,
         name: str,
+        code: str,
         description: str,
-        max_rows_processed: int,
-        cost_per_million_rows: float,
-        base_cost: float,
+        cost: float,
     ) -> Plan:
         return Plan.objects.create(
             name=name,
+            code=code,
             description=description,
-            max_rows_processed=max_rows_processed,
-            cost_per_million_rows=cost_per_million_rows,
-            base_cost=base_cost,
+            cost=cost,
         )
 
     def plan_update(self, *, plan: Plan, data: dict) -> Plan:
         fields: list[str] = [
             "name",
+            "code",
             "description",
-            "max_rows_processed",
-            "cost_per_million_rows",
-            "base_cost",
+            "cost",
         ]
         plan, has_updated = model_update(
             instance=plan,
@@ -51,13 +48,15 @@ class PlanFeatureService:
         self,
         *,
         plan: Plan,
-        feature_name: str,
-        feature_description: str,
+        code: str,
+        name: str,
+        description: str,
     ) -> PlanFeature:
         return PlanFeature.objects.create(
             plan=plan,
-            feature_name=feature_name,
-            feature_description=feature_description,
+            code=code,
+            name=name,
+            description=description,
         )
 
     def plan_feature_bulk_create(
@@ -69,8 +68,9 @@ class PlanFeatureService:
         features = [
             PlanFeature(
                 plan=plan,
-                feature_name=item["feature_name"],
-                feature_description=item["feature_description"],
+                code=item["code"],
+                name=item["name"],
+                description=item["description"],
             )
             for item in features_data
         ]
@@ -83,8 +83,9 @@ class PlanFeatureService:
         data: dict,
     ) -> PlanFeature:
         fields: list[str] = [
-            "feature_name",
-            "feature_description",
+            "code",
+            "name",
+            "description",
         ]
         plan_feature, has_updated = model_update(
             instance=plan_feature,

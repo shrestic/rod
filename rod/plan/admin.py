@@ -9,9 +9,7 @@ class PlanAdmin(admin.ModelAdmin):
     list_display = [
         "name",
         "description",
-        "max_rows_processed",
-        "cost_per_million_rows",
-        "base_cost",
+        "cost",
     ]
     list_per_page = 10
     ordering = ["name"]
@@ -21,9 +19,9 @@ class PlanAdmin(admin.ModelAdmin):
 class PlanFeatureAdmin(admin.ModelAdmin):
     list_display = [
         "plan",
-        "feature_name",
-        "feature_description",
+        "name",
+        "description",
     ]
     list_per_page = 10
-    ordering = ["plan__name", "feature_name"]
+    ordering = ["plan__name", "name"]
     list_select_related = ["plan"]

@@ -122,7 +122,6 @@ class TestCustomer:
 
             # Assert: Verify the results
             assert response.status_code == status.HTTP_200_OK
-            assert response.data["id"] == "123e4567-e89b-12d3-a456-426614174000"
             assert response.data["phone"] == "1234567890"
             assert response.data["address"] == "1234567890"
             assert response.data["birth_date"] == "2021-01-01"

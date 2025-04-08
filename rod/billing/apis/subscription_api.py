@@ -23,7 +23,6 @@ class SubscriptionListAPI(APIView):
         class Meta:
             model = Subscription
             fields = [
-                "id",
                 "customer",
                 "plan",
                 "start_date",
@@ -46,7 +45,6 @@ class SubscriptionDetailAPI(APIView):
         class Meta:
             model = Subscription
             fields = [
-                "id",
                 "customer",
                 "plan",
                 "start_date",
@@ -67,6 +65,7 @@ class SubscriptionDetailAPI(APIView):
                 raise ApplicationError(message="Customer not found")
             subscription = SubscriptionSelector().subscription_get_by_customer(
                 customer_id=customer_id,
+                is_active=True,
             )
             if subscription is None:
                 raise ApplicationError(message="Subscription not found")
@@ -80,12 +79,12 @@ class SubscriptionCreateAPI(APIView):
     permission_classes = [IsAuthenticated, IsCustomer]
 
     class InputSerializer(serializers.Serializer):
-        plan_id = serializers.IntegerField()
+        plan_code = serializers.CharField()
 
     def post(self, request):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        plan = PlanSelector().plan_get(plan_id=serializer.validated_data["plan_id"])
+        plan = PlanSelector().plan_get(code=serializer.validated_data["plan_code"])
         if plan is None:
             raise ApplicationError(message="Plan not found")
         customer = CustomerSelector().customer_get(user_id=request.user.id)
@@ -120,6 +119,7 @@ class SubscriptionCancelAPI(APIView):
             raise ApplicationError(message="Customer not found")
         subscription = SubscriptionSelector().subscription_get_by_customer(
             customer_id=customer.id,
+            is_active=True,
         )
         if subscription is None:
             raise ApplicationError(message="Subscription not found")

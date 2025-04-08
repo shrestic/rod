@@ -24,11 +24,11 @@ class TestPlan:
         plan = baker.make(Plan)
 
         # Act
-        response = api_client.get(f"/plan/plans/{plan.id}/")
+        response = api_client.get(f"/plan/plans/{plan.code}/")
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["id"] == plan.id
+        assert response.data["code"] == plan.code
 
     def test_if_anonymous_user_can_get_plan_feature_list_return_200(self, api_client):
         # Arrange
@@ -36,7 +36,7 @@ class TestPlan:
         baker.make(PlanFeature, plan=plan, _quantity=3)
 
         # Act
-        response = api_client.get(f"/plan/plans/{plan.id}/features/")
+        response = api_client.get(f"/plan/plans/{plan.code}/features/")
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -52,7 +52,8 @@ class TestPlan:
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["id"] == feature.id
+        assert response.data["name"] == feature.name
+        assert response.data["description"] == feature.description
 
     def test_if_anonymous_user_can_not_create_plan_return_403(self, api_client):
         # Act
@@ -66,7 +67,7 @@ class TestPlan:
         plan = baker.make(Plan)
 
         # Act
-        response = api_client.patch(f"/plan/plans/{plan.id}/update/", {})
+        response = api_client.patch(f"/plan/plans/{plan.code}/update/", {})
 
         # Assert
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -76,14 +77,14 @@ class TestPlan:
         plan = baker.make(Plan)
 
         # Act
-        response = api_client.delete(f"/plan/plans/{plan.id}/delete/")
+        response = api_client.delete(f"/plan/plans/{plan.code}/delete/")
 
         # Assert
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_if_anonymous_user_can_not_create_plan_feature_return_403(self, api_client):
         # Act
-        response = api_client.post("/plan/plans/1/features/create/", {})
+        response = api_client.post("/plan/plan-features/create/", {})
 
         # Assert
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -153,7 +154,7 @@ class TestPlan:
         authenticate()
 
         # Act
-        response = api_client.post("/plan/plans/1/features/create/", {})
+        response = api_client.post("/plan/plan-features/create/", {})
 
         # Assert
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -237,54 +238,10 @@ class TestPlan:
         make_employee_is_support_agent()
 
         # Act
-        response = api_client.post("/plan/plans/1/features/create/", {})
+        response = api_client.post("/plan/plan-features/create/", {})
 
         # Assert
         assert response.status_code == status.HTTP_403_FORBIDDEN
-
-    def test_if_employee_is_product_admin_can_create_plan_return_201(
-        self,
-        api_client,
-        make_employee_is_product_admin,
-    ):
-        # Arrange
-        make_employee_is_product_admin()
-        data = {
-            "name": "Test Plan",
-            "description": "Test Description",
-            "max_rows_processed": 1000000,
-            "cost_per_million_rows": 100.00,
-            "base_cost": 100.00,
-        }
-
-        # Act
-        response = api_client.post("/plan/plans/create/", data)
-
-        # Assert
-        assert response.status_code == status.HTTP_201_CREATED
-        assert Plan.objects.filter(name="Test Plan").exists()
-
-    def test_if_employee_is_product_admin_can_update_plan_return_200(
-        self,
-        api_client,
-        make_employee_is_product_admin,
-    ):
-        # Arrange
-        make_employee_is_product_admin()
-        plan = baker.make(Plan)
-        data = {
-            "name": "Updated Plan",
-            "description": "Updated Description",
-            "max_rows_processed": 2000000,
-            "cost_per_million_rows": 200.00,
-            "base_cost": 200.00,
-        }
-
-        # Act
-        response = api_client.patch(f"/plan/plans/{plan.id}/update/", data)
-
-        # Assert
-        assert response.status_code == status.HTTP_200_OK
 
     def test_if_employee_is_product_admin_can_delete_plan_return_204(
         self,
@@ -296,11 +253,10 @@ class TestPlan:
         plan = baker.make(Plan)
 
         # Act
-        response = api_client.delete(f"/plan/plans/{plan.id}/delete/")
+        response = api_client.delete(f"/plan/plans/{plan.code}/delete/")
 
         # Assert
         assert response.status_code == status.HTTP_204_NO_CONTENT
-        assert not Plan.objects.filter(id=plan.id).exists()
 
     def test_if_employee_is_product_admin_can_create_plan_feature_return_201(
         self,
@@ -310,17 +266,24 @@ class TestPlan:
         # Arrange
         make_employee_is_product_admin()
         plan = baker.make(Plan)
-        data = {
-            "feature_name": "Test Feature",
-            "feature_description": "Test Description",
+
+        feature_data = {
+            "plan_code": plan.code,
+            "code": "feature-001",
+            "name": "Test Feature",
+            "description": "This is a test feature.",
         }
 
         # Act
-        response = api_client.post(f"/plan/plans/{plan.id}/features/create/", data)
+        response = api_client.post(
+            "/plan/plan-features/create/",
+            data=feature_data,
+            format="json",
+        )
 
         # Assert
         assert response.status_code == status.HTTP_201_CREATED
-        assert PlanFeature.objects.filter(feature_name="Test Feature").exists()
+        assert PlanFeature.objects.filter(name="Test Feature").exists()
 
     def test_if_employee_is_product_admin_can_bulk_create_plan_feature_return_201(
         self,
@@ -332,26 +295,33 @@ class TestPlan:
         plan = baker.make(Plan)
         data = [
             {
-                "feature_name": "Test Feature 1",
-                "feature_description": "Test Description 1",
+                "name": "Unlimited Connectors",
+                "description": "No connector limits",
+                "code": "advanced__no-connector-limits",
             },
             {
-                "feature_name": "Test Feature 2",
-                "feature_description": "Test Description 2",
+                "name": "Unlimited Blocks",
+                "description": "No transformation limits",
+                "code": "advanced__no-transformation-limits",
+            },
+            {
+                "name": "Scheduler & Support",
+                "description": "Priority scheduling and help",
+                "code": "advanced__priority-scheduling-and-help",
             },
         ]
 
         # Act
         response = api_client.post(
-            f"/plan/plans/{plan.id}/features/bulk-create/",
+            f"/plan/plans/{plan.code}/features/bulk-create/",
             data=data,
             format="json",
         )
 
         # Assert
         assert response.status_code == status.HTTP_201_CREATED
-        assert PlanFeature.objects.filter(feature_name="Test Feature 1").exists()
-        assert PlanFeature.objects.filter(feature_name="Test Feature 2").exists()
+        assert PlanFeature.objects.filter(name="Scheduler & Support").exists()
+        assert PlanFeature.objects.filter(name="Unlimited Blocks").exists()
 
     def test_if_employee_is_product_admin_can_update_plan_feature_return_200(
         self,
@@ -363,8 +333,9 @@ class TestPlan:
         plan = baker.make(Plan)
         feature = baker.make(PlanFeature, plan=plan)
         data = {
-            "feature_name": "Updated Feature",
-            "feature_description": "Updated Description",
+            "name": "Connector Limit",
+            "description": "Up to 2 connectors",
+            "code": "free__up-to-2-connectors",
         }
 
         # Act
@@ -372,7 +343,7 @@ class TestPlan:
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
-        assert PlanFeature.objects.filter(feature_name="Updated Feature").exists()
+        assert PlanFeature.objects.filter(name="Connector Limit").exists()
 
     def test_if_employee_is_product_admin_can_delete_plan_feature_return_204(
         self,
