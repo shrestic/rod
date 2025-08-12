@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -36,19 +36,19 @@ jobs:
 
     steps:
       - name: Checkout Code Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build the Stack with Bake
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
           files: docker-compose.local.yml
           targets: django
           load: true
       - name: Build the Docs with Bake
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
           files: docker-compose.docs.yml
           targets: docs
